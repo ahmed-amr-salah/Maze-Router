@@ -3,18 +3,6 @@
 from collections import deque
 from typing import List, Tuple, Optional, Dict
 
-def build_grid(router_input) -> List[List[Dict]]:
-    grid = [
-        [{'obstacle': False} for _ in range(router_input.grid_width)]
-        for _ in range(router_input.grid_height)
-    ]
-    
-    for obs in router_input.obstructions:
-        layer, x, y = obs
-        if 0 <= x < router_input.grid_width and 0 <= y < router_input.grid_height:
-            grid[y][x]['obstacle'] = True
-    
-    return grid
 
 def lee_maze_algorithm(
     grid: List[List[Dict]], 
@@ -89,3 +77,26 @@ def route_net(
         full_path.extend(path_segment)
     
     return full_path
+
+def route_all_nets(
+    router_input: Dict
+) -> Dict[str, List[Tuple[int, int, int]]]:
+    grid = [
+        [{'obstacle': False} for _ in range(router_input['grid_width'])]
+        for _ in range(router_input['grid_height'])
+    ]
+    
+    for obs in router_input['obstructions']:
+        layer, x, y = obs
+        if 0 <= x < router_input['grid_width'] and 0 <= y < router_input['grid_height']:
+            grid[y][x]['obstacle'] = True
+    
+    routing_results = {}
+    penalties = (router_input['bend_penalty'], router_input['via_penalty'])
+    
+    for net in router_input['nets']:
+        path = route_net(grid, net, penalties)
+        if path:
+            routing_results[net['name']] = path
+    
+    return routing_results
