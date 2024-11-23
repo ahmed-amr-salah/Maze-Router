@@ -25,13 +25,20 @@ def lee_maze_algorithm(
                 path.append(current)
                 current = parent.get(current)
             return path[::-1]
-        directions = [
-            (0, 1, layer),
-            (1, 0, layer),
-            (0, -1, layer),
-            (-1, 0, layer),
-            (0, 0, 3 - layer)  
-        ]
+        if layer == 1:
+            directions = [
+                (1, 0, layer),    # Move Right
+                (-1, 0, layer),   # Move Left
+                (0, 0, 2)         # Switch to Layer 2
+            ]
+        elif layer == 2:
+            directions = [
+                (0, 1, layer),    # Move Up
+                (0, -1, layer),   # Move Down
+                (0, 0, 1)         # Switch to Layer 1
+            ]
+        else:
+            directions = []
         
         for dx, dy, new_layer in directions:
             nx, ny = x + dx, y + dy
