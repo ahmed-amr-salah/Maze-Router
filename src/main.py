@@ -1,8 +1,8 @@
 import sys
-from src.parser import parse_maze_router_input
-from src.output_display import print_input_data
-from src.algorithm import route_all_nets
-from src.output_display import print_routing_result, write_routing_results_to_file
+from parser import parse_maze_router_input
+from output_display import print_input_data
+from algorithm import route_all_nets
+from output_display import print_routing_result, write_routing_results_to_file
 
 if __name__ == "__main__":
     try:

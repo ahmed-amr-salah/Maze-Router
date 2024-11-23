@@ -1,33 +1,47 @@
 import os
+import sys
 import subprocess
 from filecmp import cmp
 
 # Add the project root to PYTHONPATH
-project_root = os.path.dirname(os.path.abspath(__file__)) + "/../"
-os.environ["PYTHONPATH"] = project_root
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, project_root)
+print(f"PYTHONPATH set to: {project_root}")
+
+def compare_files(file1, file2):
+    with open(file1, 'r') as f1, open(file2, 'r') as f2:
+        lines1 = [line.strip() for line in f1.readlines()]  # Remove trailing whitespace
+        lines2 = [line.strip() for line in f2.readlines()]  # Remove trailing whitespace
+    
+    return lines1 == lines2
 
 def run_test(test_dir):
     input_file = os.path.join(test_dir, "input.txt")
     expected_output_file = os.path.join(test_dir, "expected_output.txt")
     actual_output_file = os.path.join(test_dir, "actual_output.txt")
+
+    # Full path to main.py
+    main_script = os.path.join(project_root, "src", "main.py")
     
-    # Use python3 explicitly
     try:
+        # Use python3 explicitly with the absolute path to main.py
         result = subprocess.run(
-            ["python3", "src/main.py", input_file, actual_output_file],
+            ["python3", main_script, input_file, actual_output_file],
             capture_output=True,
             text=True
         )
         if result.returncode != 0:
             print(f"Test failed in {test_dir}. Error:\n{result.stderr}")
             return False
-        
+
         # Compare outputs
-        if cmp(expected_output_file, actual_output_file, shallow=False):
+        if compare_files(expected_output_file, actual_output_file):
             print(f"Test passed in {test_dir}.")
             return True
         else:
             print(f"Test failed in {test_dir}. Output mismatch.")
+            # uncomment the following line to see the diff output, if desired
+            #subprocess.run(["diff", "-u", expected_output_file, actual_output_file])
             return False
 
     except Exception as e:
@@ -36,7 +50,8 @@ def run_test(test_dir):
 
 
 if __name__ == "__main__":
-    test_cases_dir = "tests/test_cases"
+    # Full path to the test cases directory
+    test_cases_dir = os.path.join(os.path.dirname(__file__), "test_cases")
     all_tests_passed = True
 
     for test_case in os.listdir(test_cases_dir):

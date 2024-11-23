@@ -1,7 +1,7 @@
-# algorithm.py
 
 from collections import deque
 from typing import List, Tuple, Optional, Dict
+from parser import MazeRouterInput
 
 
 def lee_maze_algorithm(
@@ -29,13 +29,17 @@ def lee_maze_algorithm(
             directions = [
                 (1, 0, layer),    # Move Right
                 (-1, 0, layer),   # Move Left
-                (0, 0, 2)         # Switch to Layer 2
+                (0, 0, 2),         # Switch to Layer 2
+                (0, 1, layer),    # Move Up
+                (0, -1, layer)    # Move Down
             ]
         elif layer == 2:
             directions = [
                 (0, 1, layer),    # Move Up
                 (0, -1, layer),   # Move Down
-                (0, 0, 1)         # Switch to Layer 1
+                (0, 0, 1),         # Switch to Layer 1
+                (1, 0, layer),    # Move Right
+                (-1, 0, layer)    # Move Left
             ]
         else:
             directions = []
@@ -49,7 +53,7 @@ def lee_maze_algorithm(
                     cost = grid[y][x].get('cost', 0)
                     if layer != new_layer:
                         cost += via_penalty
-                    if dx != 0 and dy != 0:
+                    if (layer==1 and dy!=0) or (layer==2 and dx!=0):
                         cost += bend_penalty
                     grid[ny][nx]['cost'] = cost
                     visited.add(neighbor)
@@ -86,24 +90,24 @@ def route_net(
     return full_path
 
 def route_all_nets(
-    router_input: Dict
+    router_input: MazeRouterInput
 ) -> Dict[str, List[Tuple[int, int, int]]]:
     grid = [
-        [{'obstacle': False} for _ in range(router_input['grid_width'])]
-        for _ in range(router_input['grid_height'])
+        [{'obstacle': False} for _ in range(router_input.grid_width)]
+        for _ in range(router_input.grid_height)
     ]
     
-    for obs in router_input['obstructions']:
+    for obs in router_input.obstructions:
         layer, x, y = obs
-        if 0 <= x < router_input['grid_width'] and 0 <= y < router_input['grid_height']:
+        if 0 <= x < router_input.grid_width and 0 <= y < router_input.grid_height:
             grid[y][x]['obstacle'] = True
     
     routing_results = {}
-    penalties = (router_input['bend_penalty'], router_input['via_penalty'])
+    penalties = (router_input.bend_penalty, router_input.via_penalty)
     
-    for net in router_input['nets']:
-        path = route_net(grid, net, penalties)
+    for net in router_input.nets:
+        path = route_net(grid, net, penalties)  # Pass net dictionary
         if path:
-            routing_results[net['name']] = path
+            routing_results[net['name']] = path  # Access net name
     
     return routing_results
