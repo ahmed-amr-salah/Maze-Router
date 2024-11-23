@@ -1,5 +1,5 @@
 import sys
-from parser import parse_maze_router_input
+from parser import parse_maze_router_input, validate_router_input
 from output_display import print_input_data
 from algorithm import route_all_nets
 from output_display import print_routing_result, write_routing_results_to_file
@@ -14,6 +14,7 @@ if __name__ == "__main__":
         output_path = sys.argv[2]
 
         router_input = parse_maze_router_input(input_path)
+        validate_router_input(router_input)
         print_input_data(router_input)
         routing_results = route_all_nets(router_input)
 

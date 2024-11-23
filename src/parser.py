@@ -40,3 +40,22 @@ def parse_maze_router_input(file_path):
                 router_input.nets.append({'name': net_name, 'pins': pins})
 
     return router_input
+
+def validate_router_input(router_input):
+    if router_input.grid_width <= 0 or router_input.grid_height <= 0:
+        raise ValueError("Grid dimensions must be positive integers.")
+    
+    if router_input.bend_penalty < 0 or router_input.via_penalty < 0:
+        raise ValueError("Penalties must be non-negative.")
+    
+    for obs in router_input.obstructions:
+        layer, x, y = obs
+        if x < 0 or y < 0 or x >= router_input.grid_width or y >= router_input.grid_height:
+            raise ValueError(f"Invalid obstruction position: ({layer}, {x}, {y}).")
+        
+    for net in router_input.nets:
+        if len(net['pins']) < 2:
+            raise ValueError(f"Net '{net['name']}' must have at least two pins.")
+        for pin in net['pins']:
+            if pin['x'] < 0 or pin['y'] < 0 or pin['x'] >= router_input.grid_width or pin['y'] >= router_input.grid_height:
+                raise ValueError(f"Invalid pin position in net '{net['name']}': ({pin['layer']}, {pin['x']}, {pin['y']}).")
